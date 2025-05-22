@@ -73,6 +73,9 @@ import contact_img from './contact_img.png'
 import razorpay_logo from './razorpay_logo.png'
 import stripe_logo from './stripe_logo.png'
 import cross_icon from './cross_icon.png'
+import pay_pal from './paypal.jpg'
+import inter_switch from './interswitch.jpg'
+import flutter_wave from './flutterwave.jpg'
 
 export const assets = {
     logo,
@@ -92,7 +95,10 @@ export const assets = {
     contact_img,
     razorpay_logo,
     stripe_logo,
-    cross_icon
+    cross_icon,
+    pay_pal,
+    flutter_wave,
+    inter_switch
 }
 
 export const products = [

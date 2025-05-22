@@ -12,12 +12,16 @@ import Order from './pages/Order.jsx'
 import Navbar from './components/Navbar.jsx'
 import Footer from './components/Footer.jsx'
 import Search from './components/Search.jsx'
+import { ToastContainer, toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
 const App = () => {
   return (
    
       <div className='px-4 sm:px-[5vw] md:px-[8vw] lg:px-[10vw]'> 
+      <ToastContainer />
         <Navbar />
+
         <Search />
         <Routes>
           <Route path="/" element={<Home />} />
