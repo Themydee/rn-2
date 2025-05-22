@@ -2,12 +2,14 @@ import React, {useContext, useState, useEffect} from 'react'
 import { useParams } from 'react-router-dom'
 import { ShopContext } from '../contexts/ShopContexts'
 import { assets } from '../asset/frontend_assets/assets'
+import RelatedProducts from '../components/RelatedProducts'
 
 const Product = () => {
 
   const {productId} = useParams()
   const {products} = useContext(ShopContext)
   const {currency} = useContext(ShopContext)
+  const {addToCart} = useContext(ShopContext)
   const [productData, setProductData] = useState(false)
   const [image, setImage] = useState(false)
   const [size, setSize] = useState('')
@@ -67,7 +69,7 @@ const Product = () => {
             </div>
           </div>
 
-          <button className='bg-black text-white px-8 py-3 text-sm active:bg-gray-700'> ADD TO CART</button>
+          <button onClick={() => addToCart(productData._id, size)}className='bg-black text-white px-8 py-3 text-sm active:bg-gray-700'> ADD TO CART</button>
           <hr className='mt-8 sm:w-4/5'/>
           <div className="text-sm text-gray-500 mt-5 flex flex-col gap-1">
             <p>100% Original product</p>
@@ -87,6 +89,8 @@ const Product = () => {
           <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Pariatur animi quia numquam? Inventore expedita commodi deleniti dolorum vel, ea totam mollitia, laudantium eum cupiditate laborum nesciunt, esse veniam veritatis odit?</p>
         </div>
       </div>
+
+      <RelatedProducts category={productData.category} subCategory={productData.subCategory}/>
     </div>
   ) : <div className='opacity-0'></div>
 }
