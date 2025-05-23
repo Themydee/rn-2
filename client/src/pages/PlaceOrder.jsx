@@ -1,14 +1,15 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import Title from '../components/Title'
 import CartTotal from '../components/CartTotal'
 import { assets } from '../asset/frontend_assets/assets'
-import { useNavigate } from 'react-router-dom'
+
+import { ShopContext } from '../contexts/ShopContexts'
 
 const PlaceOrder = () => {
 
   const [method, setMethod] = useState('cod');
 
-  const {navigte} = useNavigate()
+  const {navigate} = useContext(ShopContext)
 
   return (
     <div className='flex flex-col sm:flex-row gap-4 justify-between pt-5 sm:pt-14 min-h[80vh] border-t'>
@@ -18,18 +19,18 @@ const PlaceOrder = () => {
         </div>
 
         <div className="flex gap-3">
-          <input type="text" placeholder='First Name' className='border-gray-300 rounded py-1.5 px-3.5 w-full '/>
-          <input type="text" placeholder='Last Name' className='border-gray-300 rounded py-1.5 px-3.5 w-full '/>
+          <input type="text" placeholder='First Name' className='border-gray-300 rounded py-1.5 px-3.5 w-full ' />
+          <input type="text" placeholder='Last Name' className='border-gray-300 rounded py-1.5 px-3.5 w-full ' />
         </div>
 
-        <input type="text" placeholder='Email Address' className='border-gray-300 rounded py-1.5 px-3.5 w-full '/>
+        <input type="text" placeholder='Email Address' className='border-gray-300 rounded py-1.5 px-3.5 w-full ' />
 
         <div className="flex gap-3">
-          <input type="text" placeholder='Street' className='border-gray-300 rounded py-1.5 px-3.5 w-full '/>
-          <input type="text" placeholder='City' className='border-gray-300 rounded py-1.5 px-3.5 w-full '/>
+          <input type="text" placeholder='Street' className='border-gray-300 rounded py-1.5 px-3.5 w-full ' />
+          <input type="text" placeholder='City' className='border-gray-300 rounded py-1.5 px-3.5 w-full ' />
         </div>
 
-        <input type="text" placeholder='Phone Number' className='border-gray-300 rounded py-1.5 px-3.5 w-full '/>
+        <input type="text" placeholder='Phone Number' className='border-gray-300 rounded py-1.5 px-3.5 w-full ' />
       </div>
 
       <div className="mt-8">
@@ -64,7 +65,7 @@ const PlaceOrder = () => {
           </div>
 
           <div className="w-full text-end mt-8">
-            <button onClick={()=>navigte('/orders')}className='bg-black text-white px-16 py-3 text-sm'>PLACE ORDER</button>
+            <button onClick={()=>navigate('/order')}className='bg-black text-white px-16 py-3 text-sm'>PLACE ORDER</button>
           </div>
         </div>
       </div>
