@@ -4,16 +4,26 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon index.js"
   },
   "keywords": [],
   "author": "Themydee",
+  "type": "module",
   "license": "ISC",
   "dependencies": {
+    "@paypal/checkout-server-sdk": "^1.0.3",
     "bcrypt": "^6.0.0",
+    "cloudinary": "^2.6.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
     "express": "^5.1.0",
+    "flutterwave": "^2.2.8",
+    "interswitch": "^2.1.7",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.15.0",
-    "nodemon": "^3.1.10"
+    "multer": "^2.0.0",
+    "nodemon": "^3.1.10",
+    "validator": "^13.15.0"
   }
 }
