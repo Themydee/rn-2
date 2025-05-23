@@ -2,6 +2,7 @@ import express from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
 import { DB } from './db/config.js';
+import cloudinaryConfig from './db/cloudinary.js';
 
 dotenv.config();
 
@@ -17,5 +18,6 @@ app.get('/', (req,res)=> {
 
 app.listen(PORT, ()=> {
     DB();
+    cloudinaryConfig();
     console.log("Server is running");
 })
