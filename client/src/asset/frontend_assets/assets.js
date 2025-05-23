@@ -76,6 +76,7 @@ import cross_icon from './cross_icon.png'
 import pay_pal from './paypal.jpg'
 import inter_switch from './interswitch.jpg'
 import flutter_wave from './flutterwave.jpg'
+import broken_404 from './404.jpg'
 
 export const assets = {
     logo,
@@ -98,7 +99,8 @@ export const assets = {
     cross_icon,
     pay_pal,
     flutter_wave,
-    inter_switch
+    inter_switch,
+    broken_404
 }
 
 export const products = [
