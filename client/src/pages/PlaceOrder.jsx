@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react'
 import Title from '../components/Title'
 import CartTotal from '../components/CartTotal'
-import { assets } from '../asset/frontend_assets/assets'
+import { assets } from '../asset/assets'
 
 import { ShopContext } from '../contexts/ShopContexts'
 
@@ -29,6 +29,8 @@ const PlaceOrder = () => {
           <input type="text" placeholder='Street' className='border-gray-300 rounded py-1.5 px-3.5 w-full ' />
           <input type="text" placeholder='City' className='border-gray-300 rounded py-1.5 px-3.5 w-full ' />
         </div>
+        <input type="text" placeholder='Address' className='border-gray-300 rounded py-1.5 px-3.5 w-full ' />
+
 
         <input type="text" placeholder='Phone Number' className='border-gray-300 rounded py-1.5 px-3.5 w-full ' />
       </div>

@@ -1,6 +1,6 @@
 import React from 'react'
 import Title from '../components/Title'
-import { assets } from '../asset/frontend_assets/assets'
+import { assets } from '../asset/assets'
 import { Link } from 'react-router-dom'
 import NewsLetter from '../components/NewsLetter'
 
