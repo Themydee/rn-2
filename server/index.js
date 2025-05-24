@@ -21,6 +21,7 @@ app.get("/", (req, res) => {
 app.use('/api/user', userRoute);
 app.use('/api/product', productRoute)
 
+
 app.listen(PORT, ()=> {
    DB();
     cloudinaryConfig();
