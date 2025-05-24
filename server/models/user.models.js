@@ -14,10 +14,14 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    lastLogin: {
+        type: Date,
+        default: Date.now,
+    },
     cartData:{
         type: Object,
         default: {},
-    }
-})
+    },
+}, { minimize: false });
 
 export const User = mongoose.model('User', userSchema)
