@@ -1,5 +1,5 @@
 import React from 'react'
-import { assets } from '../asset/frontend_assets/assets'
+import { assets } from '../asset/assets'
 const Footer = () => {
   return (
     <div>

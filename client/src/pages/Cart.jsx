@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect } from 'react'
 import  { ShopContext } from '../contexts/ShopContexts'
 import Title from '../components/Title'
-import { assets } from '../asset/frontend_assets/assets'
+import { assets } from '../asset/assets'
 import CartTotal from '../components/CartTotal'
 
 const Cart = () => {

@@ -1,6 +1,6 @@
 import { createContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { products } from "../asset/frontend_assets/assets";
+import { products } from "../asset/assets";
 import { toast } from "react-toastify";
 
 export const ShopContext = createContext();
@@ -18,10 +18,9 @@ const ShopContextProvider = (props) => {
 
 
     const shippingFeesByLocation = {
-        'Lagos': 2000,
-        'Abuja': 4000,
-        'Port Harcourt': 5000,
-        'Ibadan': 2500,
+        'Lagos': 5000,
+        'Abuja': 3000,
+        'Igbo States': 5000,
     }
     const getCartCount = () => {
         let totalCount = 0
