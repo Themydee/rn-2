@@ -2,10 +2,9 @@ import { User } from "../models/user.models.js";
 import bcrypt from 'bcrypt'
 import validator from 'validator'
 import jwt from 'jsonwebtoken';
-import { token } from "../utils/token.generate.js";
 
 
-export const signup = async (req,res) => {
+export const signup = async (req, res) => {
     try {
         const { name, email, password } = req.body;
 
@@ -13,12 +12,12 @@ export const signup = async (req,res) => {
             return res.status(400).json({ message: "All fields are required" });
         }
 
-        const userExists = await User.findOne({email});
-        if(userExists){
-            return res.status(400).json({ message: "User already exists" });    
+        const userExists = await User.findOne({ email });
+        if (userExists) {
+            return res.status(400).json({ message: "User already exists" });
         }
 
-        if(!validator.isEmail(email)) {
+        if (!validator.isEmail(email)) {
             return res.status(400).json({ message: "Please use a valid email" });
         }
 
@@ -29,17 +28,24 @@ export const signup = async (req,res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
-
         const newUser = new User({
             name,
             email,
             password: hashedPassword,
-            
-        })
+        });
+
+        // Use newUser._id as the userId
+        const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET_KEY, {
+            expiresIn: '1h',
+        });
+
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            maxAge: 3600000, // 1 hour
+        });
 
         await newUser.save();
-        token(res, newUser._id);
-       
 
         res.status(201).json({
             success: true,
@@ -50,11 +56,11 @@ export const signup = async (req,res) => {
                 name: newUser.name,
                 email: newUser.email,
             },
-        })
+        });
     } catch (error) {
         res.status(400).json({ success: false, message: error.message });
     }
-}
+};
 
 
 export const login = async (req,res) => {

@@ -1,7 +1,7 @@
 import { createContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { products } from "../asset/assets";
 import { toast } from "react-toastify";
+import axios from 'axios'
 
 export const ShopContext = createContext();
 
@@ -9,19 +9,23 @@ const ShopContextProvider = (props) => {
 
     const currency = '₦'
     const packaging_fee = '200'
+    const serverUrl = import.meta.env.VITE_SERVER_URL || 'http://localhost:8000'
     const [search, setSearch] = useState('')
     const [showSearch, setShowSearch] = useState(false)
     const [cartItems, setCartItems] = useState({})
     const [shippingFee, setShippingFee] = useState(0)
     const [location, setLocation] = useState('')
     const navigate = useNavigate();
-
+    const [products, setProducts] = useState([])
+    const [token, setToken] = useState("")
 
     const shippingFeesByLocation = {
         'Lagos': 5000,
         'Abuja': 3000,
         'Igbo States': 5000,
     }
+   
+
     const getCartCount = () => {
         let totalCount = 0
         for(const items in cartItems){
@@ -46,6 +50,25 @@ const ShopContextProvider = (props) => {
         cartData[itemId][size] = quantity;
         setCartItems(cartData)
     }
+
+    const getProductsData = async () => {
+        try {
+            const response = await axios.get(serverUrl + '/api/product/list');
+            if(response.data.success){
+                setProducts(response.data.product)
+            }else{
+                toast.error(response.data.message)
+            }
+        } catch (error) {
+            console.log(error)
+            toast.error(error.message)
+        }
+    }
+
+    useEffect(() => {
+        getProductsData();
+    },[])
+    
 
     const getCartAmount = () => {
         let totalAmount = 0
@@ -95,6 +118,7 @@ const ShopContextProvider = (props) => {
     }
 }, [location]);
 
+
     const value = {
         products, 
         currency, 
@@ -104,6 +128,7 @@ const ShopContextProvider = (props) => {
         showSearch, 
         setShowSearch,
         cartItems,
+        setCartItems,
         addToCart,
         getCartCount,
         updateQuantity,
@@ -111,7 +136,10 @@ const ShopContextProvider = (props) => {
         location,
         setLocation,
         shippingFee,
-        navigate
+        navigate,
+        serverUrl,
+        setToken,
+        token
     }
 
     return (

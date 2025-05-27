@@ -77,6 +77,7 @@ import pay_pal from './paypal.jpg'
 import inter_switch from './interswitch.jpg'
 import flutter_wave from './flutterwave.jpg'
 import broken_404 from './404.jpg'
+import card from './card.jpg'
 
 export const assets = {
     logo,
@@ -100,7 +101,8 @@ export const assets = {
     pay_pal,
     flutter_wave,
     inter_switch,
-    broken_404
+    broken_404,
+    
 }
 
 export const products = [

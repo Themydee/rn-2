@@ -43,21 +43,16 @@ const PlaceOrder = () => {
         <div className="mt-12">
           <Title text1={'PAYMENT'} text2={'METHOD'}/>
           <div className="flex gap-3 flex-col lg:flex-row">
-            <div onClick={()=> setMethod('paypal')} className="flex items-center gap-3 border p-2 px-3 cursor-pointer">
-              <p className={`w-3.5 h-3.5 border rounded-full ${method === 'paypal' ? 'bg-green-400' : ''}`}></p>
-              <img src={assets.pay_pal} className=' w-24 mx-4' alt="" />
+            
+             <div onClick={()=>setMethod('transfer')} className="flex items-center gap-3 border p-2 px-3 cursor-pointer">
+              <p className={`w-3.5 h-3.5 border rounded-full ${method === 'transfer' ? 'bg-green-400' : ''}`}></p>
+              <p className='text-gray-500 text-sm font-medium mx-4'>PAY BY TRANSFER</p>
             </div>
 
-            <div onClick={()=>setMethod('interswitch')} className="flex items-center gap-3 border p-2 px-3 cursor-pointer">
-              <p className={`w-3.5 h-3.5 border rounded-full ${method === 'interswitch' ? 'bg-green-400' : ''}`}></p>
-              <img src={assets.inter_switch} className=' w-24 mx-4' alt="" />
 
-            </div>
-
-             <div onClick={()=>setMethod('flutterwave')} className="flex items-center gap-3 border p-2 px-3 cursor-pointer">
-              <p className={`w-3.5 h-3.5 border rounded-full ${method === 'flutterwave' ? 'bg-green-400' : ''}`}></p>
-              <img src={assets.flutter_wave} className=' w-24 mx-4' alt="" />
-
+            <div onClick={()=>setMethod('card')} className="flex items-center gap-3 border p-2 px-3 cursor-pointer">
+              <p className={`w-3.5 h-3.5 border rounded-full ${method === 'card' ? 'bg-green-400' : ''}`}></p>
+              <p className='text-gray-500 text-sm font-medium mx-4'>PAY WITH CARD</p>
             </div>
 
             <div onClick={()=>setMethod('cod')} className="flex items-center gap-3 border p-2 px-3 cursor-pointer">
