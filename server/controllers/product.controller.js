@@ -65,19 +65,25 @@ export const listProduct = async (req, res) => {
 }
 
 export const deleteProduct = async (req, res) => {
-    try {
-        await Product.findByIdAndDelete(req.body.id);  
-        return res.status(200).json({
-            success: true,
-            message: "Product deleted successfully",
-        }) 
+  try {
+    const { id } = req.body;
 
-    } catch (error) {
-        console.log(error);
-        res.status(400).json({ success: false, message: error.message });
+    if (!id) {
+      return res.status(400).json({ success: false, message: 'Product ID is required' });
     }
-}
 
+    const product = await Product.findByIdAndDelete(id);
+
+    if (!product) {
+      return res.status(404).json({ success: false, message: 'Product not found' });
+    }
+
+    res.status(200).json({ success: true, message: 'Product deleted successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
 export const singleProduct = async (req,res) => {
     try{
         const {productId} = req.body;

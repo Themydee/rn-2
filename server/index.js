@@ -6,6 +6,7 @@ import cloudinaryConfig from './db/cloudinary.js';
 import userRoute from './routes/user.route.js';
 import productRoute from './routes/product.route.js';   
 
+
 dotenv.config();
 
 const app = express();
