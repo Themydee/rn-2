@@ -17,12 +17,15 @@ const ShopContextProvider = (props) => {
     const [location, setLocation] = useState('')
     const navigate = useNavigate();
     const [products, setProducts] = useState([])
+    const [token, setToken] = useState("")
 
     const shippingFeesByLocation = {
         'Lagos': 5000,
         'Abuja': 3000,
         'Igbo States': 5000,
     }
+   
+
     const getCartCount = () => {
         let totalCount = 0
         for(const items in cartItems){
@@ -51,9 +54,14 @@ const ShopContextProvider = (props) => {
     const getProductsData = async () => {
         try {
             const response = await axios.get(serverUrl + '/api/product/list');
-            console.log(response.data)
+            if(response.data.success){
+                setProducts(response.data.product)
+            }else{
+                toast.error(response.data.message)
+            }
         } catch (error) {
-            
+            console.log(error)
+            toast.error(error.message)
         }
     }
 
@@ -120,6 +128,7 @@ const ShopContextProvider = (props) => {
         showSearch, 
         setShowSearch,
         cartItems,
+        setCartItems,
         addToCart,
         getCartCount,
         updateQuantity,
@@ -128,7 +137,9 @@ const ShopContextProvider = (props) => {
         setLocation,
         shippingFee,
         navigate,
-        serverUrl
+        serverUrl,
+        setToken,
+        token
     }
 
     return (
