@@ -24,27 +24,27 @@ const ShopContextProvider = (props) => {
         'Abuja': 3000,
         'Igbo States': 5000,
     }
-   
+
 
     const getCartCount = () => {
         let totalCount = 0
-        for(const items in cartItems){
-            for(const item in cartItems[items]){
+        for (const items in cartItems) {
+            for (const item in cartItems[items]) {
                 try {
                     if (cartItems[items][item] > 0) {
                         totalCount += cartItems[items][item]
                     }
                 } catch (error) {
-                    
+
                 }
             }
         }
         return totalCount
     }
 
- 
 
-    const updateQuantity = async(itemId, size, quantity) => {
+
+    const updateQuantity = async (itemId, size, quantity) => {
         let cartData = structuredClone(cartItems);
 
         cartData[itemId][size] = quantity;
@@ -54,9 +54,9 @@ const ShopContextProvider = (props) => {
     const getProductsData = async () => {
         try {
             const response = await axios.get(serverUrl + '/api/product/list');
-            if(response.data.success){
+            if (response.data.success) {
                 setProducts(response.data.product)
-            }else{
+            } else {
                 toast.error(response.data.message)
             }
         } catch (error) {
@@ -67,8 +67,8 @@ const ShopContextProvider = (props) => {
 
     useEffect(() => {
         getProductsData();
-    },[])
-    
+    }, [])
+
 
     const getCartAmount = () => {
         let totalAmount = 0
@@ -80,17 +80,17 @@ const ShopContextProvider = (props) => {
                         totalAmount += itemInfo.price * cartItems[items][item]
                     }
                 } catch (error) {
-                    
+
                 }
             }
-           
+
         }
         return totalAmount + shippingFee
     }
 
-    const addToCart = async(itemId, size) => {
+    const addToCart = async (itemId, size) => {
 
-        if(!size){
+        if (!size) {
             toast.error('Please select a product size')
             return;
         }
@@ -100,10 +100,10 @@ const ShopContextProvider = (props) => {
         if (cartData[itemId]) {
             if (cartData[itemId][size]) {
                 cartData[itemId][size] += 1;
-            }else{
+            } else {
                 cartData[itemId][size] = 1;
             }
-        }else{
+        } else {
             cartData[itemId] = {}
             cartData[itemId][size] = 1;
         }
@@ -113,19 +113,19 @@ const ShopContextProvider = (props) => {
 
 
     useEffect(() => {
-    if (location) {
-        setShippingFee(shippingFeesByLocation[location] || shippingFeesByLocation['default']);
-    }
-}, [location]);
+        if (location) {
+            setShippingFee(shippingFeesByLocation[location] || shippingFeesByLocation['default']);
+        }
+    }, [location]);
 
 
     const value = {
-        products, 
-        currency, 
-        packaging_fee, 
-        search, 
-        setSearch, 
-        showSearch, 
+        products,
+        currency,
+        packaging_fee,
+        search,
+        setSearch,
+        showSearch,
         setShowSearch,
         cartItems,
         setCartItems,
