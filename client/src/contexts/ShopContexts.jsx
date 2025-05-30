@@ -42,6 +42,31 @@ const ShopContextProvider = (props) => {
         return totalCount
     }
 
+    const getUserCart = async(token) => {
+        try {
+            const response = await axios.post(serverUrl + '/api/cart/get', {}, {headers: {
+                Authorization: `Bearer ${token}`,
+            }})
+
+            if (response.data.success) {
+                setCartItems(response.data.cartData)
+            }else{
+                toast.error(response.data.message)
+            }
+        } catch (error) {
+            console.error('Error fetching user cart:', error);
+            const errorMessage = error.response?.data?.message || 'Failed to fetch cart';
+            toast.error(errorMessage);
+        }
+    };
+
+    useEffect(() => {
+        if (!token && localStorage.getItem('token')) {
+            setToken(localStorage.getItem('token'))
+            getUserCart(localStorage.getItem('token'));
+        }
+    },[]);
+
 
 
     const updateQuantity = async (itemId, size, quantity) => {
@@ -49,6 +74,26 @@ const ShopContextProvider = (props) => {
 
         cartData[itemId][size] = quantity;
         setCartItems(cartData)
+
+        try {
+            const response = await axios.post(serverUrl + '/api/cart/update', {itemId, size, quantity}, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                },
+            });
+
+            if(response.data.success){
+                setCartItems(response.data.cartData);
+                toast.success('Cart Updated Successfully');
+
+            }else{
+                toast.error(response.data.message);
+            }
+        } catch (error) {
+            console.error('Error adding to cart:', error);
+            const errorMessage = error.response?.data?.message || 'Failed to add item to cart';
+            toast.error(errorMessage);
+        }
     }
 
     const getProductsData = async () => {
@@ -108,7 +153,23 @@ const ShopContextProvider = (props) => {
             cartData[itemId][size] = 1;
         }
 
-        setCartItems(cartData)
+        setCartItems(cartData);
+
+        try {
+           const response = await axios.post(serverUrl + '/api/cart/add', {itemId, size}, { headers: {
+            Authorization: `Bearer ${token}`,
+           }});
+
+           if (response.data.success) {
+            toast.success('Item added to cart successfully');
+           }else{
+            toast.error(response.data.message);
+           }
+        } catch (error) {
+            console.error('Error adding to cart:', error);
+            const errorMessage = error.response?.data?.message || 'Failed to add item to cart';
+            toast.error(errorMessage);
+        }
     }
 
 
