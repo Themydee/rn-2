@@ -34,8 +34,10 @@ export const signup = async (req, res) => {
             password: hashedPassword,
         });
 
-        // Use newUser._id as the userId
-        const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET_KEY, {
+        await newUser.save();
+
+        // Generate JWT token with userId
+        const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET_KEY, {
             expiresIn: '1h',
         });
 
@@ -44,8 +46,6 @@ export const signup = async (req, res) => {
             secure: process.env.NODE_ENV === 'production',
             maxAge: 3600000, // 1 hour
         });
-
-        await newUser.save();
 
         res.status(201).json({
             success: true,
@@ -62,59 +62,49 @@ export const signup = async (req, res) => {
     }
 };
 
+export const login = async (req, res) => {
+    const { email, password } = req.body;
 
-export const login = async (req,res) => {
-    const {email, password} = req.body;
+    try {
+        const user = await User.findOne({ email });
 
-    try{
-        //get user by email
-        const user = await User.findOne({email})
-
-        //if no user is found pass the error message
-        if(!user){
-
+        if (!user) {
             return res.status(400).json({ success: false, message: "User not found" });
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
 
-        if(!isMatch){
+        if (!isMatch) {
             return res.status(400).json({ success: false, message: "Invalid credentials" });
         }
 
-        // Generate JWT token
-        const token = jwt.sign(
-          { userId: user._id, email: user.email },
-          process.env.JWT_SECRET_KEY, 
-          { expiresIn: '1h' }  
-        );
+        // Generate JWT token with userId
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY, {
+            expiresIn: '1h',
+        });
 
-      // Set token in a cookie (optional)
         res.cookie("token", token, {
-            httpOnly: true,  
+            httpOnly: true,
             maxAge: 3600000, // 1 hour
         });
 
         user.lastLogin = new Date();
         await user.save();
 
-        // Send back the response with the token and user details
         res.status(200).json({
-          success: true,
-          message: "You have been successfully logged in",
-          token,
-          user: {
-            _id: user._id,
-            name: user.name,
-            email: user.email,
-          }
+            success: true,
+            message: "You have been successfully logged in",
+            token,
+            user: {
+                _id: user._id,
+                name: user.name,
+                email: user.email,
+            },
         });
     } catch (error) {
         res.status(400).json({ success: false, message: error.message });
     }
-
-   
-}
+};
 
 export const verifyEmail = async (req,res) => {
     
