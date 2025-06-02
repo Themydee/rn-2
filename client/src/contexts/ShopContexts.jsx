@@ -130,7 +130,7 @@ const ShopContextProvider = (props) => {
             }
 
         }
-        return totalAmount + shippingFee
+        return totalAmount
     }
 
     const addToCart = async (itemId, size) => {
@@ -200,7 +200,8 @@ const ShopContextProvider = (props) => {
         navigate,
         serverUrl,
         setToken,
-        token
+        token,
+        setCartItems
     }
 
     return (
