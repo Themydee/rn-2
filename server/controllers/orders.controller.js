@@ -39,7 +39,13 @@ export const placeOrderCard = async(req, res) => {
 }
 
 export const allOrders = async(req, res) => {
-    
+    try {
+        const orders = await Orders.find({})
+        return res.status(201).json({success: true, orders})
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ success: false, message: "Internal Server Error" });
+    }
 }
 
 export const userOrders = async(req, res) => {
@@ -48,8 +54,8 @@ export const userOrders = async(req, res) => {
     
         const userId = req.user.id;
 
-        await Orders.find({ userId });
-        return res.status(201).json({ success: true})
+        const orders = await Orders.find({ userId });
+        return res.status(201).json({ success: true, orders})
 
     } catch(error){
         console.log(error);

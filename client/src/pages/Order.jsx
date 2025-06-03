@@ -2,37 +2,42 @@ import React, { useState, useContext } from 'react'
 import { ShopContext } from '../contexts/ShopContexts'
 import Title from '../components/Title'
 import { useEffect } from 'react'
+import axios from 'axios'
 
 const Order = () => {
-  const { serverUrl, token, currency} = useContext(ShopContext)
+  const { serverUrl, token, currency } = useContext(ShopContext)
   const [orderData, setOrderData] = useState([])
 
   const loadOrderData = async () => {
     try {
-      if(!token){
+      if (!token) {
         return null
       }
 
-      const response = await axios.post(serverUrl + '/api/orders/get-orders', {},{headers: {
-            Authorization: `Bearer ${token}`
-          }})
+      const response = await axios.post(serverUrl + '/api/orders/get-orders', {}, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+      console.log(response.data);
 
-          if (response.data.success) {
-            let allOrderItems = []
-            response.data.orders.map((order) => {
-              order.items.map(() => {
-                item['status'] = order.status
-                item['payment'] = order.payment
-                item['paymentMethod'] = order.paymentMethod
-                item['date'] = order.date
-                allOrderItems.push(item)
-              }) 
-            })
 
-            setOrderData(allOrderItems.reverse())
-          }
+      if (response.data.success) {
+        let allOrderItems = []
+        response.data.orders.map((order) => {
+          order.items.map((item) => {
+            item['status'] = order.status
+            item['payment'] = order.payment
+            item['paymentMethod'] = order.paymentMethod
+            item['date'] = order.date
+            allOrderItems.push(item)
+          })
+        })
+
+        setOrderData(allOrderItems.reverse())
+      }
     } catch (error) {
-      
+
     }
 
   }
@@ -40,7 +45,9 @@ const Order = () => {
 
   useEffect(() => {
     loadOrderData()
-  }, [token])
+  }, [token]);
+
+  
   return (
     <div className='border-t pt-16'>
       <div className="text-2xl">
@@ -56,24 +63,26 @@ const Order = () => {
                   <img className='w-16 sm:w-20' src={item.image[0]} alt="" />
                   <div>
                     <p className="font-medium sm:text-base">{item.name}</p>
-                    <div className="flex items-center gap-3 mt-2 text-base text-gray-700">
-                      <p className="text-lg">{currency}</p>
-                      <p>Quantity: 1</p>
-                      <p>Size: M</p>
+                    <div className="flex items-center gap-3 mt-1 text-base text-gray-700">
+                      <p>{currency} {item.price}</p>
+                      <p>Quantity: {item.quantity}</p>
+                      <p>Size: {item.size}</p>
                     </div>
-                    <p>Date: <span className='text-gray-400'>25, July, 2025 </span></p>
+                    <p className='mt-1'>Date: <span className='text-gray-400'>{new Date(item.date).toDateString()}</span></p>
+                    <p className='mt-1'>Pay By: <span className='text-gray-400'>{item.paymentMethod}</span></p>
+
                   </div>
 
                 </div>
 
                 <div className='md:w-1/2 flex justify-between'>
-                    <div className="flex items-center gap-2">
-                      <p className="w-2 h-2 rounded-full bg-green-500"></p>
-                      <p className="text-sm md:text-base">Ready to Ship</p>
-                    </div>
-
-                    <button className='border px-4 py-8 text-sm font-medium rounded-sm'>Track Order</button>
+                  <div className="flex items-center gap-2">
+                    <p className="w-2 h-2 rounded-full bg-green-500"></p>
+                    <p className="text-sm md:text-base">{item.status}</p>
                   </div>
+
+                  <button onClick={loadOrderData} className='border px-4 py-8 text-sm font-medium rounded-sm'>Track Order</button>
+                </div>
               </div>
             )
           })
