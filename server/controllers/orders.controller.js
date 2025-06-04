@@ -30,10 +30,40 @@ export const placeOrder = async(req, res) => {
 
 }
 
-export const placeOrderTransfer = async(req, res) => {
+export const placeOrderTransfer = async (req, res) => {
     try {
-        const { orderId } = req.body;
+        const { items, amount, address } = req.body; 
+        const userId = req.user.id; 
 
+        
+        const newOrder = new Orders({
+            userId,
+            items,
+            address,
+            amount,
+            status: 'Awaiting Payment', 
+            paymentMethod: 'Bank Transfer',
+            payment: false, 
+            date: Date.now(),
+        });
+
+        
+        await newOrder.save();
+
+        
+        await User.findByIdAndUpdate(userId, { cartData: {} });
+
+        
+        return res.status(201).json({ success: true, message: "Order placed successfully via bank transfer", order: newOrder });
+    } catch (error) {
+        console.error("Error placing order via bank transfer:", error);
+        return res.status(500).json({ success: false, message: "Internal Server Error" });
+    }
+};
+
+export const verifyPayment = async (req, res) => {
+    try {
+        const { orderId, paymentProof } = req.body; 
         
         const order = await Orders.findById(orderId);
 
@@ -41,23 +71,16 @@ export const placeOrderTransfer = async(req, res) => {
             return res.status(404).json({ success: false, message: "Order not found" });
         }
 
-        
-        const paymentVerified = true; 
+        order.paymentProof = paymentProof; 
+        order.status = "Payment Verification Pending"; 
+        await order.save();
 
-        if (paymentVerified) {
-            order.payment = true;
-            order.status = "Payment Verified";
-            await order.save();
-
-            return res.status(200).json({ success: true, message: "Payment verified successfully", order });
-        } else {
-            return res.status(400).json({ success: false, message: "Payment verification failed" });
-        }
+        return res.status(200).json({ success: true, message: "Payment proof submitted successfully. Awaiting admin verification.", order });
     } catch (error) {
         console.error("Error verifying payment:", error);
         return res.status(500).json({ success: false, message: "Internal Server Error" });
     }
-}
+};
 
 
 

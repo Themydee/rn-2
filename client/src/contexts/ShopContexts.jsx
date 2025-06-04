@@ -8,7 +8,7 @@ export const ShopContext = createContext();
 const ShopContextProvider = (props) => {
 
     const currency = '₦'
-    const packaging_fee = '200'
+    const packaging_fee = '2000'
     const serverUrl = import.meta.env.VITE_SERVER_URL || 'http://localhost:8000'
     const [search, setSearch] = useState('')
     const [showSearch, setShowSearch] = useState(false)

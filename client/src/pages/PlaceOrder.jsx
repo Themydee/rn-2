@@ -2,6 +2,7 @@ import React, { useContext, useState } from 'react'
 import Title from '../components/Title'
 import CartTotal from '../components/CartTotal'
 import axios from 'axios'
+import { toast } from 'react-toastify'
 
 import { ShopContext } from '../contexts/ShopContexts'
 
@@ -56,7 +57,7 @@ const PlaceOrder = () => {
       }
 
       const totalAmount = cartAmount + shippingFeeNum + packagingFeeNum;
-     
+
       let orderData = {
         address: formData,
         items: orderItems,
@@ -64,27 +65,48 @@ const PlaceOrder = () => {
 
       }
 
-      switch(method){
+      switch (method) {
         case 'cod':
-          const response = await axios.post(serverUrl + '/api/orders/place-order', orderData, {headers: {
-            Authorization: `Bearer ${token}`
-          }})
+          const response = await axios.post(serverUrl + '/api/orders/place-order', orderData, {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          })
 
           if (response.data.success) {
             setCartItems({})
             navigate('/order')
-          }else{
+          } else {
             toast.error(response.data.message);
           }
           break;
-        default:
+
+        case 'transfer':
+         const verifyResponse = await axios.post(serverUrl + '/api/orders/place-transfer', orderData, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+         })
+          if (verifyResponse.data.success) {
+            setCartItems({})
+            navigate('/bank', {
+              state: {
+                orderId: verifyResponse.data.order._id,
+                amount: totalAmount,
+              },
+            })
+          } else {
+            toast.error(verifyResponse.data.message);
+          }
           break;
 
+        default:
+          toast.error('Invalid payment method selected')
+          break;
       }
     } catch (error) {
       console.log(error);
       toast.error(error.message)
-      
     }
   }
 
@@ -98,20 +120,20 @@ const PlaceOrder = () => {
         </div>
 
         <div className="flex gap-3">
-          <input onChange={onChangeEventHandler} name='firstName' value={FormData.firstName} type="text" placeholder='First Name' className='border-gray-300 rounded py-1.5 px-3.5 w-full ' required/>
+          <input onChange={onChangeEventHandler} name='firstName' value={FormData.firstName} type="text" placeholder='First Name' className='border-gray-300 rounded py-1.5 px-3.5 w-full ' required />
           <input onChange={onChangeEventHandler} name='lastName' value={FormData.lastName} type="text" placeholder='Last Name' className='border-gray-300 rounded py-1.5 px-3.5 w-full ' required />
         </div>
 
-        <input onChange={onChangeEventHandler} name='email' value={FormData.email} type="text" placeholder='Email Address' className='border-gray-300 rounded py-1.5 px-3.5 w-full ' required/>
+        <input onChange={onChangeEventHandler} name='email' value={FormData.email} type="text" placeholder='Email Address' className='border-gray-300 rounded py-1.5 px-3.5 w-full ' required />
 
         <div className="flex gap-3">
-          <input onChange={onChangeEventHandler} name='street' value={FormData.street} type="text" placeholder='Street' className='border-gray-300 rounded py-1.5 px-3.5 w-full ' required/>
-          <input onChange={onChangeEventHandler} name='city' value={FormData.city} type="text" placeholder='City' className='border-gray-300 rounded py-1.5 px-3.5 w-full ' required/>
+          <input onChange={onChangeEventHandler} name='street' value={FormData.street} type="text" placeholder='Street' className='border-gray-300 rounded py-1.5 px-3.5 w-full ' required />
+          <input onChange={onChangeEventHandler} name='city' value={FormData.city} type="text" placeholder='City' className='border-gray-300 rounded py-1.5 px-3.5 w-full ' required />
         </div>
         <input onChange={onChangeEventHandler} name='address' value={FormData.address} type="text" placeholder='Address' className='border-gray-300 rounded py-1.5 px-3.5 w-full ' required />
 
 
-        <input onChange={onChangeEventHandler} name='phone' value={FormData.phone} type="text" placeholder='Phone Number' className='border-gray-300 rounded py-1.5 px-3.5 w-full ' required/>
+        <input onChange={onChangeEventHandler} name='phone' value={FormData.phone} type="text" placeholder='Phone Number' className='border-gray-300 rounded py-1.5 px-3.5 w-full ' required />
       </div>
 
       <div className="mt-8">
@@ -129,7 +151,7 @@ const PlaceOrder = () => {
             </div>
 
 
-            
+
             <div onClick={() => setMethod('cod')} className="flex items-center gap-3 border p-2 px-3 cursor-pointer">
               <p className={`w-3.5 h-3.5 border rounded-full ${method === 'cod' ? 'bg-green-400' : ''}`}></p>
               <p className='text-gray-500 text-sm font-medium mx-4'> CASH ON DELIVERY</p>
