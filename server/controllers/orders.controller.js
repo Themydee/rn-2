@@ -31,12 +31,35 @@ export const placeOrder = async(req, res) => {
 }
 
 export const placeOrderTransfer = async(req, res) => {
+    try {
+        const { orderId } = req.body;
 
+        
+        const order = await Orders.findById(orderId);
+
+        if (!order) {
+            return res.status(404).json({ success: false, message: "Order not found" });
+        }
+
+        
+        const paymentVerified = true; 
+
+        if (paymentVerified) {
+            order.payment = true;
+            order.status = "Payment Verified";
+            await order.save();
+
+            return res.status(200).json({ success: true, message: "Payment verified successfully", order });
+        } else {
+            return res.status(400).json({ success: false, message: "Payment verification failed" });
+        }
+    } catch (error) {
+        console.error("Error verifying payment:", error);
+        return res.status(500).json({ success: false, message: "Internal Server Error" });
+    }
 }
 
-export const placeOrderCard = async(req, res) => {
 
-}
 
 export const allOrders = async (req, res) => {
     try {
