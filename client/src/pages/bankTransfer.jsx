@@ -20,7 +20,7 @@ const BankTransfer = () => {
                 <p><strong>Account Number:</strong> 9055548483</p>
                 <p><strong>Account Name:</strong>Babatunde ANuoluwapo Grace</p>
                 <p className="text-sm text-gray-600">
-                    Please make the payment to the account above and click "Verify Payment" to proceed. The admin will verify your payment manually.
+                    Please make the payment to the account above and click "Verify Payment" to proceed. <b className=''>The admin will verify your payment manually.</b>
                 </p>
                 <button onClick={() => navigate('/order')} className="border border-black px-8 py-4 text-sm hover:bg-black hover:text-white transition-all duration-500">
                     Verify Payment
