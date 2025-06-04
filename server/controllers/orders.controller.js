@@ -38,15 +38,17 @@ export const placeOrderCard = async(req, res) => {
 
 }
 
-export const allOrders = async(req, res) => {
+export const allOrders = async (req, res) => {
     try {
-        const orders = await Orders.find({})
-        return res.status(201).json({success: true, orders})
+        console.log("Fetching all orders"); // Debugging
+        const orders = await Orders.find({});
+        console.log("Orders fetched:", orders); // Debugging
+        return res.status(200).json({ success: true, orders });
     } catch (error) {
-        console.log(error);
+        console.error("Error fetching all orders:", error);
         return res.status(500).json({ success: false, message: "Internal Server Error" });
     }
-}
+};
 
 export const userOrders = async(req, res) => {
     try{
@@ -65,5 +67,12 @@ export const userOrders = async(req, res) => {
 }
 
 export const updateStatus = async(req, res) => {
-
+    try {
+        const { orderId, status } = req.body
+        await Orders.findByIdAndUpdate(orderId, { status })
+        return res.status(201).json({ success: true, message: "Status Updated"})
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ success: true, message:error.message})
+    }
 }
