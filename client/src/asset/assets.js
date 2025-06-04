@@ -78,6 +78,7 @@ import inter_switch from './interswitch.jpg'
 import flutter_wave from './flutterwave.jpg'
 import broken_404 from './404.jpg'
 import card from './card.jpg'
+import pay from './pay.jpg'
 
 export const assets = {
     logo,
@@ -102,6 +103,7 @@ export const assets = {
     flutter_wave,
     inter_switch,
     broken_404,
+    pay
     
 }
 

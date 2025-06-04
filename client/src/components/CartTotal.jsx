@@ -1,11 +1,12 @@
-import React, {useContext} from 'react'
-import { ShopContext } from '../contexts/ShopContexts'
-import Title from './Title'
+import React, { useContext } from 'react';
+import { ShopContext } from '../contexts/ShopContexts';
+import Title from './Title';
 
 const CartTotal = () => {
-    const {location, setLocation, currency, packaging_fee, getCartAmount, shippingFee} = useContext(ShopContext)
-    const subtotal = getCartAmount()
-    const total = subtotal === 0 ? 0 : subtotal + Number(packaging_fee) + Number(shippingFee)
+    const { location, setLocation, currency, packaging_fee, getCartAmount, shippingFee } = useContext(ShopContext);
+
+    const subtotal = getCartAmount(); // Subtotal is only the cart items' total
+    const total = subtotal + Number(packaging_fee) + Number(shippingFee); // Total includes additional fees
 
     return (
         <div className='w-full'>
@@ -13,7 +14,7 @@ const CartTotal = () => {
                 <Title text1={'CART'} text2={'TOTALS'} />
             </div>
 
-            <div className="flex flex-col gap-2 text-sm mt-2"> 
+            <div className="flex flex-col gap-2 text-sm mt-2">
                 <div className="flex justify-between">
                     <p>Subtotal</p>
                     <p>{currency} {subtotal}.00</p>
@@ -24,9 +25,9 @@ const CartTotal = () => {
                     <p>{currency} {packaging_fee}</p>
                 </div>
                 <hr />
-                <div className='flex justify-between'> 
+                <div className='flex justify-between'>
                     <select value={location} onChange={(e) => setLocation(e.target.value)}>
-                        <option value=''>Select your best drop zone </option>
+                        <option value=''>Select your best drop zone</option>
                         <option value='Lagos'>Lagos</option>
                         <option value='Abuja'>Abuja</option>
                         <option value='Igbo States'>Igbo States</option>
@@ -44,7 +45,7 @@ const CartTotal = () => {
                 </div>
             </div>
         </div>
-    )
-}
+    );
+};
 
-export default CartTotal
+export default CartTotal;
