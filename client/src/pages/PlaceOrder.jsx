@@ -66,6 +66,50 @@ const PlaceOrder = () => {
       }
 
       switch (method) {
+        case 'transfer':
+  const handler = window.PaystackPop && window.PaystackPop.setup({
+    key: 'pk_live_6f7f524ad8aaa6b6316042d11895c55132de7f05', 
+    email: formData.email,
+    amount: totalAmount * 100, 
+    currency: 'NGN',
+    callback: async function(response) {
+      try {
+        // After successful payment, place the order in DB
+        const verifyRes = await axios.post(
+          serverUrl + '/api/orders/verify-paystack',
+          {
+            items: orderItems,
+            amount: totalAmount,
+            address: formData,
+            reference: response.reference,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (verifyRes.data.success) {
+          setCartItems({});
+          navigate('/order');
+        } else {
+          toast.error(verifyRes.data.message || 'Payment verified, but order failed');
+        }
+      } catch (err) {
+        console.error('Error saving order after payment', err);
+        toast.error('Error verifying payment. Contact support.');
+      }
+    },
+    onClose: function() {
+      toast.info('Payment cancelled');
+    },
+  });
+
+  if (handler) handler.openIframe();
+  break;
+
+        
         case 'cod':
           const response = await axios.post(serverUrl + '/api/orders/place-order', orderData, {
             headers: {
@@ -81,24 +125,7 @@ const PlaceOrder = () => {
           }
           break;
 
-        case 'transfer':
-         const verifyResponse = await axios.post(serverUrl + '/api/orders/place-transfer', orderData, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-         })
-          if (verifyResponse.data.success) {
-            setCartItems({})
-            navigate('/bank', {
-              state: {
-                orderId: verifyResponse.data.order._id,
-                amount: totalAmount,
-              },
-            })
-          } else {
-            toast.error(verifyResponse.data.message);
-          }
-          break;
+      
 
         default:
           toast.error('Invalid payment method selected')

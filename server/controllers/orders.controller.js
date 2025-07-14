@@ -1,124 +1,153 @@
+import axios from "axios";
 import { Orders } from "../models/orders.models.js";
 import { User } from "../models/user.models.js";
+import currency from '../../admin/src/App.jsx'
 
-export const placeOrder = async(req, res) => {
-    try {
-       const { items, amount, address } = req.body;
-        const userId = req.user.id;
+export const placeOrder = async (req, res) => {
+  try {
+    const { items, amount, address } = req.body;
+    const userId = req.user.id;
 
-        const newOrder = new Orders({
-            userId,
-            items,
-            address,
-            amount,
-            status: 'Order Placed',
-            paymentMethod: 'COD',
-            payment: false,
-            date: Date.now()
-        });
+    const newOrder = new Orders({
+      userId,
+      items,
+      address,
+      amount,
+      status: "Order Placed",
+      paymentMethod: "COD",
+      payment: false,
+      date: Date.now(),
+    });
 
-        await newOrder.save();
+    await newOrder.save();
 
-        await User.findByIdAndUpdate(userId, {cartData: {}})
-        return res.status(201).json({ success: true, message: "Order Placed successfully"})
-
-
-    } catch (error) {
-        console.error("Error placing order:", error);
-        return res.status(500).json({ success: false, message: "Internal Server Error" });
-    }
-
-}
-
-export const placeOrderTransfer = async (req, res) => {
-    try {
-        const { items, amount, address } = req.body; 
-        const userId = req.user.id; 
-
-        
-        const newOrder = new Orders({
-            userId,
-            items,
-            address,
-            amount,
-            status: 'Awaiting Payment', 
-            paymentMethod: 'Bank Transfer',
-            payment: false, 
-            date: Date.now(),
-        });
-
-        
-        await newOrder.save();
-
-        
-        await User.findByIdAndUpdate(userId, { cartData: {} });
-
-        
-        return res.status(201).json({ success: true, message: "Order placed successfully via bank transfer", order: newOrder });
-    } catch (error) {
-        console.error("Error placing order via bank transfer:", error);
-        return res.status(500).json({ success: false, message: "Internal Server Error" });
-    }
+    await User.findByIdAndUpdate(userId, { cartData: {} });
+    return res
+      .status(201)
+      .json({ success: true, message: "Order Placed successfully" });
+  } catch (error) {
+    console.error("Error placing order:", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal Server Error" });
+  }
 };
 
 export const verifyPayment = async (req, res) => {
-    try {
-        const { orderId, paymentProof } = req.body; 
-        
-        const order = await Orders.findById(orderId);
+  try {
+    const { orderId, paymentProof } = req.body;
 
-        if (!order) {
-            return res.status(404).json({ success: false, message: "Order not found" });
-        }
+    const order = await Orders.findById(orderId);
 
-        order.paymentProof = paymentProof; 
-        order.status = "Payment Verification Pending"; 
-        await order.save();
-
-        return res.status(200).json({ success: true, message: "Payment proof submitted successfully. Awaiting admin verification.", order });
-    } catch (error) {
-        console.error("Error verifying payment:", error);
-        return res.status(500).json({ success: false, message: "Internal Server Error" });
+    if (!order) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Order not found" });
     }
+
+    order.paymentProof = paymentProof;
+    order.status = "Payment Verification Pending";
+    await order.save();
+
+    return res
+      .status(200)
+      .json({
+        success: true,
+        message:
+          "Payment proof submitted successfully. Awaiting admin verification.",
+        order,
+      });
+  } catch (error) {
+    console.error("Error verifying payment:", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal Server Error" });
+  }
 };
-
-
 
 export const allOrders = async (req, res) => {
-    try {
-        console.log("Fetching all orders"); // Debugging
-        const orders = await Orders.find({});
-        console.log("Orders fetched:", orders); // Debugging
-        return res.status(200).json({ success: true, orders });
-    } catch (error) {
-        console.error("Error fetching all orders:", error);
-        return res.status(500).json({ success: false, message: "Internal Server Error" });
-    }
+  try {
+    console.log("Fetching all orders"); // Debugging
+    const orders = await Orders.find({});
+    console.log("Orders fetched:", orders); // Debugging
+    return res.status(200).json({ success: true, orders });
+  } catch (error) {
+    console.error("Error fetching all orders:", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal Server Error" });
+  }
 };
 
-export const userOrders = async(req, res) => {
-    try{
+export const userOrders = async (req, res) => {
+  try {
+    const userId = req.user.id;
 
-    
-        const userId = req.user.id;
+    const orders = await Orders.find({ userId });
+    return res.status(201).json({ success: true, orders });
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal Server Error" });
+  }
+};
 
-        const orders = await Orders.find({ userId });
-        return res.status(201).json({ success: true, orders})
+export const updateStatus = async (req, res) => {
+  try {
+    const { orderId, status } = req.body;
+    await Orders.findByIdAndUpdate(orderId, { status });
+    return res.status(201).json({ success: true, message: "Status Updated" });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ success: true, message: error.message });
+  }
+};
 
-    } catch(error){
-        console.log(error);
-        return res.status(500).json({ success: false, message: "Internal Server Error" });
-        
+export const verifyPaystackPayment = async (req, res) => {
+  try {
+    const { items, amount, address, reference } = req.body;
+    const userId = req.user.id;
+
+    // 1. Verify payment with Paystack
+    const verifyResponse = await axios.get(
+      `https://api.paystack.co/transaction/verify/${reference}`,
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+        },
+      }
+    );
+
+    const paymentData = verifyResponse.data.data;
+
+    if (paymentData.status !== 'success') {
+      return res.status(400).json({ success: false, message: 'Payment not successful' });
     }
-}
 
-export const updateStatus = async(req, res) => {
-    try {
-        const { orderId, status } = req.body
-        await Orders.findByIdAndUpdate(orderId, { status })
-        return res.status(201).json({ success: true, message: "Status Updated"})
-    } catch (error) {
-        console.log(error)
-        return res.status(500).json({ success: true, message:error.message})
-    }
-}
+    // 2. Save order to DB
+    const newOrder = new Orders({
+      userId,
+      items,
+      address,
+      amount,
+      payment: true,
+      paymentMethod: 'transfer',
+      status: 'Order Placed',
+      date: Date.now(),
+    });
+
+    await newOrder.save();
+
+    // 3. Clear user cart
+    await User.findByIdAndUpdate(userId, { cartData: {} });
+
+    return res.status(201).json({
+      success: true,
+      message: 'Payment successful and order placed',
+    });
+  } catch (error) {
+    console.error('Verify Paystack Error:', error.message);
+    return res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
