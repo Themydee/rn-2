@@ -3,12 +3,11 @@ import Title from "../components/Title";
 import CartTotal from "../components/CartTotal";
 import axios from "axios";
 import { toast } from "react-toastify";
-
+import { PaystackButton } from "react-paystack";
 import { ShopContext } from "../contexts/ShopContexts";
 
 const PlaceOrder = () => {
   const [method, setMethod] = useState("cod");
-
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -18,135 +17,6 @@ const PlaceOrder = () => {
     address: "",
     phone: "",
   });
-
-  const onChangeEventHandler = (event) => {
-    const name = event.target.name;
-    const value = event.target.value;
-
-    setFormData((data) => ({ ...data, [name]: value }));
-  };
-
-  const onSubmitHandler = async (event) => {
-    event.preventDefault();
-
-    try {
-      let orderItems = [];
-
-      for (const items in cartItems) {
-        for (const item in cartItems[items]) {
-          if (cartItems[items][item] > 0) {
-            const itemInfo = structuredClone(
-              products.find((product) => product._id === items)
-            );
-
-            if (itemInfo) {
-              itemInfo.size = item;
-              itemInfo.quantity = cartItems[items][item];
-              orderItems.push(itemInfo);
-            }
-          }
-        }
-      }
-
-      const cartAmount = Number(getCartAmount()) || 0;
-      const shippingFeeNum = Number(shippingFee) || 0;
-      const packagingFeeNum = Number(packaging_fee) || 0;
-
-      if (
-        isNaN(cartAmount) ||
-        isNaN(shippingFeeNum) ||
-        isNaN(packagingFeeNum)
-      ) {
-        toast.error(
-          "Invalid cart amount or fees. Please check your cart and try again."
-        );
-        return;
-      }
-
-      const totalAmount = cartAmount + shippingFeeNum + packagingFeeNum;
-
-      let orderData = {
-        address: formData,
-        items: orderItems,
-        amount: totalAmount,
-      };
-
-      switch (method) {
-        case "transfer":
-  const handler =
-    window.PaystackPop &&
-    window.PaystackPop.setup({
-      key: "pk_live_6f7f524ad8aaa6b6316042d11895c55132de7f05", 
-      email: formData.email,
-      amount: totalAmount * 100,
-      currency: "NGN",
-      callback: async function (response) {
-        try {
-          const verifyRes = await axios.post(
-            serverUrl + "/api/orders/verify-paystack",
-            {
-              items: orderItems,
-              amount: totalAmount,
-              address: formData,
-              reference: response.reference,
-            },
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
-
-          if (verifyRes.data.success) {
-            setCartItems({});
-            navigate("/order");
-          } else {
-            toast.error(
-              verifyRes.data.message || "Payment verified, but order failed"
-            );
-          }
-        } catch (err) {
-          console.error("Error saving order after payment", err);
-          toast.error("Error verifying payment. Contact support.");
-        }
-      },
-      onClose: function () {
-        toast.info("Payment cancelled");
-      },
-    });
-
-  if (handler) handler.openIframe();
-  break;
-
-
-        case "cod":
-          const response = await axios.post(
-            serverUrl + "/api/orders/place-order",
-            orderData,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
-
-          if (response.data.success) {
-            setCartItems({});
-            navigate("/order");
-          } else {
-            toast.error(response.data.message);
-          }
-          break;
-
-        default:
-          toast.error("Invalid payment method selected");
-          break;
-      }
-    } catch (error) {
-      console.log(error);
-      toast.error(error.message);
-    }
-  };
 
   const {
     navigate,
@@ -160,6 +30,107 @@ const PlaceOrder = () => {
     products,
   } = useContext(ShopContext);
 
+  const onChangeEventHandler = (event) => {
+    const name = event.target.name;
+    const value = event.target.value;
+    setFormData((data) => ({ ...data, [name]: value }));
+  };
+
+  // Prepare order data
+  const getOrderItems = () => {
+    let orderItems = [];
+    for (const items in cartItems) {
+      for (const item in cartItems[items]) {
+        if (cartItems[items][item] > 0) {
+          const itemInfo = structuredClone(products.find((product) => product._id === items));
+          if (itemInfo) {
+            itemInfo.size = item;
+            itemInfo.quantity = cartItems[items][item];
+            orderItems.push(itemInfo);
+          }
+        }
+      }
+    }
+    return orderItems;
+  };
+
+  const cartAmount = Number(getCartAmount()) || 0;
+  const shippingFeeNum = Number(shippingFee) || 0;
+  const packagingFeeNum = Number(packaging_fee) || 0;
+  const totalAmount = cartAmount + shippingFeeNum + packagingFeeNum;
+  const publicKey = "pk_live_6f7f524ad8aaa6b6316042d11895c55132de7f05"; // use your live/test key
+
+  const reference = new Date().getTime().toString();
+
+  const onPaystackSuccess = async (response) => {
+    try {
+      const verifyRes = await axios.post(
+        serverUrl + "/api/orders/verify-paystack",
+        {
+          items: getOrderItems(),
+          amount: totalAmount,
+          address: formData,
+          reference: response.reference,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (verifyRes.data.success) {
+        setCartItems({});
+        navigate("/order");
+      } else {
+        toast.error(verifyRes.data.message || "Verification failed");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Verification error");
+    }
+  };
+
+  const paystackProps = {
+    email: formData.email,
+    amount: totalAmount * 100,
+    reference,
+    publicKey,
+    currency: "NGN",
+    onSuccess: onPaystackSuccess,
+    onClose: () => toast.info("Payment closed"),
+  };
+
+  const onSubmitHandler = async (e) => {
+    e.preventDefault();
+    if (method === "cod") {
+      try {
+        const response = await axios.post(
+          serverUrl + "/api/orders/place-order",
+          {
+            address: formData,
+            items: getOrderItems(),
+            amount: totalAmount,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        if (response.data.success) {
+          setCartItems({});
+          navigate("/order");
+        } else {
+          toast.error(response.data.message);
+        }
+      } catch (err) {
+        console.error(err);
+        toast.error("Order error");
+      }
+    }
+  };
+
   return (
     <form
       onSubmit={onSubmitHandler}
@@ -171,122 +142,44 @@ const PlaceOrder = () => {
         </div>
 
         <div className="flex gap-3">
-          <input
-            onChange={onChangeEventHandler}
-            name="firstName"
-            value={FormData.firstName}
-            type="text"
-            placeholder="First Name"
-            className="border-gray-300 rounded py-1.5 px-3.5 w-full "
-            required
-          />
-          <input
-            onChange={onChangeEventHandler}
-            name="lastName"
-            value={FormData.lastName}
-            type="text"
-            placeholder="Last Name"
-            className="border-gray-300 rounded py-1.5 px-3.5 w-full "
-            required
-          />
+          <input onChange={onChangeEventHandler} name="firstName" value={formData.firstName} type="text" placeholder="First Name" className="border-gray-300 rounded py-1.5 px-3.5 w-full " required />
+          <input onChange={onChangeEventHandler} name="lastName" value={formData.lastName} type="text" placeholder="Last Name" className="border-gray-300 rounded py-1.5 px-3.5 w-full " required />
         </div>
 
-        <input
-          onChange={onChangeEventHandler}
-          name="email"
-          value={FormData.email}
-          type="text"
-          placeholder="Email Address"
-          className="border-gray-300 rounded py-1.5 px-3.5 w-full "
-          required
-        />
+        <input onChange={onChangeEventHandler} name="email" value={formData.email} type="email" placeholder="Email Address" className="border-gray-300 rounded py-1.5 px-3.5 w-full " required />
 
         <div className="flex gap-3">
-          <input
-            onChange={onChangeEventHandler}
-            name="street"
-            value={FormData.street}
-            type="text"
-            placeholder="Street"
-            className="border-gray-300 rounded py-1.5 px-3.5 w-full "
-            required
-          />
-          <input
-            onChange={onChangeEventHandler}
-            name="city"
-            value={FormData.city}
-            type="text"
-            placeholder="City"
-            className="border-gray-300 rounded py-1.5 px-3.5 w-full "
-            required
-          />
+          <input onChange={onChangeEventHandler} name="street" value={formData.street} type="text" placeholder="Street" className="border-gray-300 rounded py-1.5 px-3.5 w-full " required />
+          <input onChange={onChangeEventHandler} name="city" value={formData.city} type="text" placeholder="City" className="border-gray-300 rounded py-1.5 px-3.5 w-full " required />
         </div>
-        <input
-          onChange={onChangeEventHandler}
-          name="address"
-          value={FormData.address}
-          type="text"
-          placeholder="Address"
-          className="border-gray-300 rounded py-1.5 px-3.5 w-full "
-          required
-        />
-
-        <input
-          onChange={onChangeEventHandler}
-          name="phone"
-          value={FormData.phone}
-          type="text"
-          placeholder="Phone Number"
-          className="border-gray-300 rounded py-1.5 px-3.5 w-full "
-          required
-        />
+        <input onChange={onChangeEventHandler} name="address" value={formData.address} type="text" placeholder="Address" className="border-gray-300 rounded py-1.5 px-3.5 w-full " required />
+        <input onChange={onChangeEventHandler} name="phone" value={formData.phone} type="text" placeholder="Phone Number" className="border-gray-300 rounded py-1.5 px-3.5 w-full " required />
       </div>
 
       <div className="mt-8">
-        <div className="mt-8 min-w-80">
-          <CartTotal />
-        </div>
+        <CartTotal />
 
         <div className="mt-12">
           <Title text1={"PAYMENT"} text2={"METHOD"} />
           <div className="flex gap-3 flex-col lg:flex-row">
-            <div
-              onClick={() => setMethod("transfer")}
-              className="flex items-center gap-3 border p-2 px-3 cursor-pointer"
-            >
-              <p
-                className={`w-3.5 h-3.5 border rounded-full ${
-                  method === "transfer" ? "bg-green-400" : ""
-                }`}
-              ></p>
-              <p className="text-gray-500 text-sm font-medium mx-4">
-                PAY BY TRANSFER
-              </p>
+            <div onClick={() => setMethod("transfer")} className="flex items-center gap-3 border p-2 px-3 cursor-pointer">
+              <p className={`w-3.5 h-3.5 border rounded-full ${method === "transfer" ? "bg-green-400" : ""}`}></p>
+              <p className="text-gray-500 text-sm font-medium mx-4">PAY BY TRANSFER</p>
             </div>
-
-            <div
-              onClick={() => setMethod("cod")}
-              className="flex items-center gap-3 border p-2 px-3 cursor-pointer"
-            >
-              <p
-                className={`w-3.5 h-3.5 border rounded-full ${
-                  method === "cod" ? "bg-green-400" : ""
-                }`}
-              ></p>
-              <p className="text-gray-500 text-sm font-medium mx-4">
-                {" "}
-                CASH ON DELIVERY
-              </p>
+            <div onClick={() => setMethod("cod")} className="flex items-center gap-3 border p-2 px-3 cursor-pointer">
+              <p className={`w-3.5 h-3.5 border rounded-full ${method === "cod" ? "bg-green-400" : ""}`}></p>
+              <p className="text-gray-500 text-sm font-medium mx-4">CASH ON DELIVERY</p>
             </div>
           </div>
 
           <div className="w-full text-end mt-8">
-            <button
-              type="submit"
-              className="bg-black text-white px-16 py-3 text-sm"
-            >
-              PLACE ORDER
-            </button>
+            {method === "transfer" ? (
+              <PaystackButton className="bg-black text-white px-16 py-3 text-sm" {...paystackProps} />
+            ) : (
+              <button type="submit" className="bg-black text-white px-16 py-3 text-sm">
+                PLACE ORDER
+              </button>
+            )}
           </div>
         </div>
       </div>
