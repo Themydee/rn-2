@@ -119,13 +119,18 @@ export const verifyPaystackPayment = async (req, res) => {
       }
     );
 
+    // 2. Confirm verification was successful
+    if (!verifyResponse.data.status) {
+      return res.status(400).json({ success: false, message: 'Unable to verify payment with Paystack' });
+    }
+
     const paymentData = verifyResponse.data.data;
 
     if (paymentData.status !== 'success') {
       return res.status(400).json({ success: false, message: 'Payment not successful' });
     }
 
-    // 2. Save order to DB
+    // 3. Save order to DB
     const newOrder = new Orders({
       userId,
       items,
@@ -133,13 +138,15 @@ export const verifyPaystackPayment = async (req, res) => {
       amount,
       payment: true,
       paymentMethod: 'transfer',
+      transactionRef: paymentData.reference,
+      transactionId: paymentData.id,
       status: 'Order Placed',
       date: Date.now(),
     });
 
     await newOrder.save();
 
-    // 3. Clear user cart
+    // 4. Clear user cart
     await User.findByIdAndUpdate(userId, { cartData: {} });
 
     return res.status(201).json({
