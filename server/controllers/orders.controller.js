@@ -1,7 +1,6 @@
 import axios from "axios";
 import { Orders } from "../models/orders.models.js";
 import { User } from "../models/user.models.js";
-import currency from '../../admin/src/App.jsx'
 
 export const placeOrder = async (req, res) => {
   try {
@@ -109,7 +108,6 @@ export const verifyPaystackPayment = async (req, res) => {
     const { items, amount, address, reference } = req.body;
     const userId = req.user.id;
 
-    // 1. Verify payment with Paystack
     const verifyResponse = await axios.get(
       `https://api.paystack.co/transaction/verify/${reference}`,
       {
@@ -119,18 +117,12 @@ export const verifyPaystackPayment = async (req, res) => {
       }
     );
 
-    // 2. Confirm verification was successful
-    if (!verifyResponse.data.status) {
-      return res.status(400).json({ success: false, message: 'Unable to verify payment with Paystack' });
-    }
-
     const paymentData = verifyResponse.data.data;
 
     if (paymentData.status !== 'success') {
       return res.status(400).json({ success: false, message: 'Payment not successful' });
     }
 
-    // 3. Save order to DB
     const newOrder = new Orders({
       userId,
       items,
@@ -145,14 +137,10 @@ export const verifyPaystackPayment = async (req, res) => {
     });
 
     await newOrder.save();
-
-    // 4. Clear user cart
     await User.findByIdAndUpdate(userId, { cartData: {} });
 
-    return res.status(201).json({
-      success: true,
-      message: 'Payment successful and order placed',
-    });
+    return res.status(201).json({ success: true, message: 'Payment successful and order placed' });
+
   } catch (error) {
     console.error('Verify Paystack Error:', error.message);
     return res.status(500).json({ success: false, message: 'Server error' });

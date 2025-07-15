@@ -7,6 +7,7 @@ import userRoute from './routes/user.route.js';
 import productRoute from './routes/product.route.js';   
 import cartRoute from './routes/cart.route.js'
 import ordersRoute from './routes/orders.route.js'
+import paymentRoute from './routes/payment.route.js'
 
 
 dotenv.config();
@@ -25,6 +26,7 @@ app.use('/api/user', userRoute);
 app.use('/api/product', productRoute);
 app.use('/api/cart', cartRoute);
 app.use('/api/orders', ordersRoute);
+app.use('/api/payment', paymentRoute)
 
 
 app.listen(PORT, ()=> {
