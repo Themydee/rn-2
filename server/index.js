@@ -19,9 +19,18 @@ const PORT = process.env.PORT || 8000
 
 app.use(express.json());
 app.use(cors({
-    origin: allowedOrigins,
-    credentials: true,
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
 }));
+
 
 app.get("/", (req, res) => {
     res.send("Hello world!");
