@@ -17,6 +17,7 @@ import Verify from './pages/verify.jsx'
 import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import BankTransfer from './pages/bankTransfer.jsx'
+import PaymentSuccess from './pages/Paymentuccess.jsx'
 
 const App = () => {
   return (
@@ -38,6 +39,7 @@ const App = () => {
           <Route path="/place-order" element={<PlaceOrder />} /> 
           <Route path="/order" element={<Order />} />
           <Route path='/bank' element={<BankTransfer />} />
+          <Route path='/payment-success' element={<PaymentSuccess />} />
           <Route path='/not-found' element={<NotFound />} />
         </Routes>
 
