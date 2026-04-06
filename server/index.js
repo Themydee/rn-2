@@ -12,7 +12,7 @@ import paymentRoute from './routes/payment.route.js'
 
 dotenv.config();
 
-const allowedOrigins = ['https://tees-two.vercel.app']
+const allowedOrigins = ['https://tees-two.vercel.app', '*']
 
 const app = express();
 const PORT = process.env.PORT || 8000
